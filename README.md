@@ -1,6 +1,10 @@
-# birmo_codelab
+# Flutter state managemet codelab
 
-A new Flutter application.
+A flutter codelab about state management.
+It starts with an introduction to stateless and stateful widgets, using a simple counter app.
+Then moves to managing a more complex UI with multiple screens using the Bloc pattern with RxDart.
+
+Credit to for the design of the UI to [the simple state management example in flutter docs](https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple)
 
 ## Getting Started
 
