@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import './pizzas.dart';
 import 'cart_screen.dart';
+import 'main.dart';
 
 class ShoppingScreen extends StatefulWidget {
   ShoppingScreen({Key key}) : super(key: key);
@@ -10,22 +13,37 @@ class ShoppingScreen extends StatefulWidget {
 }
 
 class _ShoppingScreenState extends State<ShoppingScreen> {
-  Set<String> selectedPizzas = {};
   @override
   Widget build(BuildContext context) {
+    final cart = Provider.of<Cart>(context);
+
+    var selectedPizzas = cart.selectedPizzasStream.value;
     return Scaffold(
       appBar: AppBar(
         title: Text('Select pizzas!'),
         actions: <Widget>[
-          IconButton(
-            onPressed: _navigateToCarScreen,
-            icon: Icon(Icons.shopping_cart),
-            color: Colors.white,
-          )
+          StreamBuilder<Set<String>>(
+            stream: cart.selectedPizzasStream,
+            builder: (
+              BuildContext context,
+              AsyncSnapshot<Set<String>> snapshot,
+            ) {
+              if (!snapshot.hasData || snapshot.data.length == 0) {
+                return SizedBox();
+              }
+              return IconButton(
+                icon: Icon(
+                  Icons.shopping_cart,
+                  color: Colors.white,
+                ),
+                onPressed: _navigateToCarScreen,
+              );
+            },
+          ),
         ],
       ),
       body: Center(
-          child: ListView.builder(
+        child: ListView.builder(
             itemCount: PIZZAS.length,
             itemBuilder: (ctx, index) {
               final pizzaName = PIZZAS[index];
@@ -35,30 +53,19 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                 0.5,
                 0.5,
               ); // A piz
-              final isSelected = selectedPizzas.contains(pizzaName); // za color because they don't
               // all
               // look the
               // same
-              return ListTile(
-                leading: Container(
-                  height: 48,
-                  width: 48,
-                  color: pizzaImage.toColor(),
-                ),
-                title: Text(pizzaName),
-                trailing: FlatButton(
-                  onPressed: () {},
-                  child: isSelected
-                      ? Icon(
-                    Icons.check,
-                    color: Colors.green,
-                  )
-                      : Text('ADD',
-                      style: TextStyle(color: Theme.of(context).accentColor)),
-                ),
-              );
-            },
-          )),
+              return PizzaTile(pizzaName, pizzaImage.toColor(),
+                  selectedPizzas.contains(pizzaName), (b) {
+                if (b) {
+                  selectedPizzas.add(PIZZAS[index]);
+                } else {
+                  selectedPizzas.remove(PIZZAS[index]);
+                }
+              });
+            }),
+      ),
     );
   }
 
@@ -68,5 +75,57 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         MaterialPageRoute(
           builder: (ctx) => CartScreen(),
         ));
+  }
+}
+
+typedef ItemToggle = void Function(bool b);
+
+class PizzaTile extends StatefulWidget {
+  final String name;
+  final Color image;
+  final ItemToggle onPressed;
+  final bool isSelected;
+
+  PizzaTile(this.name, this.image, this.isSelected, this.onPressed);
+
+  @override
+  State<StatefulWidget> createState() {
+    return PizzaTileState();
+  }
+}
+
+class PizzaTileState extends State<PizzaTile> {
+  bool _selected = false;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return ListTile(
+      leading: Container(
+        height: 48,
+        width: 48,
+        color: widget.image,
+      ),
+      title: Text(widget.name),
+      trailing: FlatButton(
+        onPressed: () {
+          setState(() {
+            _selected = !_selected;
+          });
+          if (_selected) {
+            Provider.of<Cart>(context).add(widget.name);
+          } else {
+            Provider.of<Cart>(context).remove(widget.name);
+          }
+        },
+        child: _selected
+            ? Icon(
+                Icons.check,
+                color: Colors.green,
+              )
+            : Text('ADD',
+                style: TextStyle(color: Theme.of(context).accentColor)),
+      ),
+    );
   }
 }

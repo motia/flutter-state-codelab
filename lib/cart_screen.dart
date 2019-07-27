@@ -1,4 +1,8 @@
+import 'package:birmo_codelab/pizzas.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'main.dart';
 
 class CartScreen extends StatefulWidget {
   @override
@@ -6,7 +10,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int get price => 99;
+  int get totalPrice => 99;
 
   @override
   Widget build(BuildContext context) {
@@ -20,39 +24,37 @@ class _CartScreenState extends State<CartScreen> {
           Flexible(
             child: Container(
               padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    child: Text('A pizza'),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    child: Text('A pizza'),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    child: Text('A pizza'),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    child: Text('A pizza'),
-                  ),
-                ],
+              child: StreamBuilder<Set<String>>(
+                  stream: Provider
+                      .of<Cart>(context)
+                      .selectedPizzasStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return SizedBox();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: (snapshot.data).toList(growable: false).map(
+                              (x) {
+                        return Text(x);
+                      }).toList(),
+                    );
+                  }
               ),
             ),
           ),
           Divider(),
           Container(
               height: 120,
-              color: Theme.of(context).accentColor,
+              color: Theme
+                  .of(context)
+                  .accentColor,
               padding: EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    '$price DA',
+                    '$totalPrice DA',
                     style: TextStyle(fontSize: 26, color: Colors.white),
                   ),
                   SizedBox(
