@@ -1,6 +1,8 @@
 import 'package:birmo_codelab/shopping_screen.dart';
 import 'package:flutter/material.dart';
 
+import 'incrementer_screen.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -12,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      home: ShoppingScreen(),
+      home: IncrementerScreen(),
     );
   }
 }
